@@ -257,6 +257,32 @@ class Room extends EventEmitter
 					});
 				});
 
+				// ref: https://github.com/versatica/mediasoup/issues/115
+				mediaPeer.on('newrtpreceiver', (rtpReceiver) => {
+					if (rtpReceiver.kind !== 'video') {
+						return
+					}
+						
+					rtpReceiver
+					  .on('rtpobject', (packet) => {
+						// packet looks like this:
+						// {
+						// 	"marker": true,
+						// 	"payloadType": 101,
+						// 	"sequenceNumber": 13208,
+						// 	"ssrc": 319429825,
+						// 	"timestamp": 752441819,
+						// 	"payload": {
+						// 		"type": "Buffer",
+						// 		"data": [...]
+						// }
+						//
+						// packet.payload.data is what we want to record
+
+						console.log('########################', JSON.stringify(packet, null, '  '))
+					  })
+				  })
+
 				// Set RTCPeerConnection capabilities.
 				return peerconnection.setCapabilities(data.capabilities);
 			})
